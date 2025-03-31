@@ -2,21 +2,21 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: results-deployment
+  name: result-deployment
 spec:
   replicas: 2
   selector:
     matchLabels:
-      app: results
+      app: result
   template:
     metadata:
       labels:
-        app: results
+        app: result
     spec:
       containers:
       - name: result-container
         
-        image: bacon21/result
+        image: juliaroesschen/result
         ports:
           - containerPort: 80
         env:
@@ -29,10 +29,10 @@ spec:
 apiVersion: v1
 kind: Service
 metadata:
-  name: results-service
+  name: result-service
 spec:
   selector:
-    app: results
+    app: result
   ports:
     - port: 80
       targetPort: 80

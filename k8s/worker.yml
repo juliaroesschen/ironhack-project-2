@@ -15,7 +15,7 @@ spec:
     spec:
       containers:
       - name: worker-container
-        image: bacon21/worker
+        image: juliaroesschen/worker
         env:
           - name: REDIS_HOST
             value: "redis-service"
