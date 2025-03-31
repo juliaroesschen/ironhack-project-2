@@ -72,7 +72,6 @@ jobs:
           mv ./kubectl $HOME/bin/kubectl
           echo "$HOME/bin" >> $GITHUB_PATH
 
-
       - name: Update kubeconfig for EKS
         run: |
           aws eks update-kubeconfig --region ${{ secrets.AWS_REGION }} --name ${{ secrets.AWS_CLUSTER }}
