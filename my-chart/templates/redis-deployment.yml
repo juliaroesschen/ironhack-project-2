@@ -1,0 +1,40 @@
+---
+# Redis Deployment Template
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "my-chart.fullname" . }}-redis
+spec:
+  replicas: {{ .Values.redis.replicaCount }}
+  selector:
+    matchLabels:
+      app: redis
+  template:
+    metadata:
+      labels:
+        app: redis
+    spec:
+      containers:
+      - name: redis
+        image: "{{ .Values.redis.image.repository }}:{{ .Values.redis.image.tag }}"
+        ports:
+          - containerPort: 6379
+        env:
+          - name: REDIS_PASSWORD
+            valueFrom:
+              secretKeyRef:
+                name: "{{ .Values.secrets.name }}"   # Use explicit double quotes here
+                key: REDIS_PASSWORD
+---
+# Redis Service Template
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "my-chart.fullname" . }}-redis-service
+spec:
+  selector:
+    app: redis
+  ports:
+    - name: redis-port
+      port: 6379
+      targetPort: 6379

@@ -1,0 +1,31 @@
+# Source: my-chart/templates/postgres-deployment.yml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: my-release-my-chart-postgres  # Uses Helm helper to create a unique name; change "my-chart" if needed.
+spec:
+  replicas: 1        # Set replica count in values.yaml
+  selector:
+    matchLabels:
+      app: postgres
+  template:
+    metadata:
+      labels:
+        app: postgres
+    spec:
+      containers:
+      - name: postgres
+        image: "postgres:13"  # Set image and tag in values.yaml
+        ports:
+          - containerPort: 5432
+        env:
+          - name: POSTGRES_USER
+            valueFrom:
+              secretKeyRef:
+                name: "database-credentials"   # Secret name from values.yaml
+                key: POSTGRES_USER
+          - name: POSTGRES_PASSWORD
+            valueFrom:
+              secretKeyRef:
+                name: "database-credentials"   # Secret name must be quoted to be rendered as a string
+                key: POSTGRES_PASSWORD

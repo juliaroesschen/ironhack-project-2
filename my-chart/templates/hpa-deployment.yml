@@ -1,0 +1,41 @@
+---
+# Horizontal Pod Autoscaler for Postgres
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: {{ include "my-chart.fullname" . }}-postgres-hpa # Customize the HPA name if needed
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: {{ include "my-chart.fullname" . }}-postgres  # Must match the name of your Postgres Deployment
+  minReplicas: {{ .Values.postgres.hpa.minReplicas }}    # Set minimum replicas in values.yaml
+  maxReplicas: {{ .Values.postgres.hpa.maxReplicas }}    # Set maximum replicas in values.yaml
+  metrics:
+  - type: Resource
+    resource:
+      name: cpu
+      target:
+        type: Utilization
+        averageUtilization: {{ .Values.postgres.hpa.cpuUtilization }}  # Set target CPU utilization percentage in values.yaml
+
+---
+# Horizontal Pod Autoscaler for Redis
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: {{ include "my-chart.fullname" . }}-redis-hpa # Customize the HPA name if needed
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: {{ include "my-chart.fullname" . }}-redis  # Must match the name of your Redis Deployment
+  minReplicas: {{ .Values.redis.hpa.minReplicas }}    # Set minimum replicas in values.yaml
+  maxReplicas: {{ .Values.redis.hpa.maxReplicas }}    # Set maximum replicas in values.yaml
+  metrics:
+  - type: Resource
+    resource:
+      name: cpu
+      target:
+        type: Utilization
+        averageUtilization: {{ .Values.redis.hpa.cpuUtilization }}  # Set target CPU utilization percentage in values.yaml

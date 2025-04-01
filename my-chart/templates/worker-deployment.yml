@@ -1,0 +1,48 @@
+---
+# Worker Deployment Template
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "my-chart.fullname" . }}-worker  # Combined release name with worker suffix
+spec:
+  replicas: {{ .Values.worker.replicaCount }}        # Set replica count in values.yaml
+  selector:
+    matchLabels:
+      app: worker
+  template:
+    metadata:
+      labels:
+        app: worker
+    spec:
+      containers:
+      - name: worker-container
+        image: "{{ .Values.worker.image.repository }}:{{ .Values.worker.image.tag }}"  # Image details from values.yaml
+        env:
+          - name: REDIS_HOST
+            value: {{ .Values.worker.env.redisHost | quote }}    # Redis hostname (e.g., "redis-service")
+          - name: DB_HOST
+            value: {{ .Values.worker.env.dbHost | quote }}       # Postgres service hostname (e.g., "postgres-service")
+          - name: DB_USERNAME
+            valueFrom:
+              secretKeyRef:
+                name: {{ .Values.secrets.name | quote }}       # Reference to the secret name
+                key: POSTGRES_USER                             # Key for the Postgres user
+          - name: DB_PASSWORD
+            valueFrom:
+              secretKeyRef:
+                name: {{ .Values.secrets.name | quote }}       # Reference to the secret name
+                key: POSTGRES_PASSWORD                         # Key for the Postgres password
+          - name: DB_NAME
+            value: {{ .Values.worker.env.dbName | quote }}       # Database name (e.g., "postgres")
+---
+# Worker Service Template
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "my-chart.fullname" . }}-worker-service  # Unique service name for the worker
+spec:
+  selector:
+    app: worker
+  ports:
+    - port: 80
+      targetPort: 80

@@ -1,0 +1,125 @@
+# Global chart configuration
+replicaCount: 1
+
+image:
+  repository: nginx
+  pullPolicy: IfNotPresent
+  tag: ""
+
+imagePullSecrets: []
+nameOverride: ""
+fullnameOverride: ""
+
+serviceAccount:
+  create: true
+  automount: true
+  annotations: {}
+  name: ""
+
+podAnnotations: {}
+podLabels: {}
+
+podSecurityContext: {}
+securityContext: {}
+
+service:
+  type: ClusterIP
+  port: 80
+
+ingress:
+  enabled: false
+  className: ""
+  annotations: {}
+  hosts:
+    - host: chart-example.local
+      paths:
+        - path: /
+          pathType: ImplementationSpecific
+  tls: []
+
+resources: {}
+
+livenessProbe:
+  httpGet:
+    path: /
+    port: http
+
+readinessProbe:
+  httpGet:
+    path: /
+    port: http
+
+autoscaling:
+  enabled: false
+  minReplicas: 1
+  maxReplicas: 100
+  targetCPUUtilizationPercentage: 80
+
+volumes: []
+volumeMounts: []
+nodeSelector: {}
+tolerations: []
+affinity: {}
+
+# Microservice specific configurations
+
+postgres:
+  replicaCount: 1                # Number of Postgres replicas
+  image:
+    repository: postgres         # Postgres image repository
+    tag: "13"                    # Postgres version tag
+  env:
+    dbHost: "postgres-service"   # Postgres service hostname
+    dbUsername: "postgres"       # Database username (consider using a secret)
+    dbPassword: "postgres"       # Database password (consider using a secret)
+    dbName: "postgres"           # Database name
+    redisHost: "redis-service"   # Redis service hostname (if used by Postgres)
+  hpa:
+    minReplicas: 1               # Minimum replicas for Postgres HPA
+    maxReplicas: 4               # Maximum replicas for Postgres HPA
+    cpuUtilization: 50           # Target CPU utilization percentage
+
+redis:
+  replicaCount: 1                # Number of Redis replicas
+  image:
+    repository: redis            # Redis image repository
+    tag: "latest"                # Redis image tag
+  hpa:
+    minReplicas: 1               # Minimum replicas for Redis HPA
+    maxReplicas: 4               # Maximum replicas for Redis HPA
+    cpuUtilization: 50           # Target CPU utilization percentage
+
+result:
+  replicaCount: 2                # Number of replicas for Result service
+  image:
+    repository: juliaroesschen/result  # Result service image repository
+    tag: "latest"                # Result service image tag
+  env:
+    pgHost: "postgres-service"   # Postgres service hostname
+    pgPort: "5432"               # Postgres port
+    pgUser: "postgres"           # Postgres username (consider using a secret)
+    pgPassword: "postgres"       # Postgres password (consider using a secret)
+    pgDatabase: "postgres"       # Postgres database name
+
+vote:
+  replicaCount: 2                # Number of replicas for Vote service
+  image:
+    repository: juliaroesschen/vote    # Vote service image repository
+    tag: "latest"                # Vote service image tag
+  env:
+    redisHost: "redis-service"   # Redis service hostname
+    redisPort: "6379"            # Redis port
+
+worker:
+  replicaCount: 1                # Number of replicas for Worker service
+  image:
+    repository: juliaroesschen/worker  # Worker service image repository
+    tag: "latest"                # Worker service image tag
+  env:
+    redisHost: "redis-service"   # Redis service hostname
+    dbHost: "postgres-service"   # Postgres service hostname
+    dbName: "postgres"           # Database name
+
+# Secret configuration (ensure this secret exists in your cluster)
+secrets:
+  name: "database-credentials"

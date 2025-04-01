@@ -1,0 +1,45 @@
+---
+# Result Deployment Template
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "my-chart.fullname" . }}-result   # Combined release name and suffix; adjust if needed
+spec:
+  replicas: {{ .Values.result.replicaCount }}         # Configure replica count in values.yaml
+  selector:
+    matchLabels:
+      app: result
+  template:
+    metadata:
+      labels:
+        app: result
+    spec:
+      containers:
+      - name: result-container
+        image: "{{ .Values.result.image.repository }}:{{ .Values.result.image.tag }}"  # Image details from values.yaml
+        ports:
+          - containerPort: 80
+        env:
+          - name: PG_HOST
+            value: {{ .Values.result.env.pgHost | quote }}    # Set the Postgres host (e.g., "postgres-service")
+          - name: PG_PORT
+            value: {{ .Values.result.env.pgPort | quote }}    # Set the Postgres port (e.g., "5432")
+          - name: PG_USER
+            value: {{ .Values.result.env.pgUser | quote }}    # Set the Postgres user
+          - name: PG_PASSWORD
+            value: {{ .Values.result.env.pgPassword | quote }}  # Set the Postgres password (consider using secrets)
+          - name: PG_DATABASE
+            value: {{ .Values.result.env.pgDatabase | quote }}  # Set the database name
+
+---
+# Result Service Template
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "my-chart.fullname" . }}-result-service  # Combined name for the service
+spec:
+  selector:
+    app: result
+  ports:
+    - port: 80
+      targetPort: 80
