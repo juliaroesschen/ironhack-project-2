@@ -1,45 +1,45 @@
-# Worker Deployment
+
+# Postgres Deployment
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: worker-deployment
+  name: postgres-deployment
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: worker
+      app: postgres
   template:
     metadata:
       labels:
-        app: worker
+        app: postgres
     spec:
       containers:
-      - name: worker-container
-        image: juliaroesschen/worker
+      - name: postgres
+        image: postgres:13
+        ports:
+          - containerPort: 5432
         env:
+          - name: DB_HOST
+            value: "postgres-service"
+          - name: DB_USERNAME
+            value: "postgres"
+          - name: DB_PASSWORD 
+            value: "postgres"
+          - name: DB_NAME
+            value: "postgres"
           - name: REDIS_HOST
             value: "redis-service"
-          - name: POSTGRES_HOST
-            value: "postgres-service"
-          - name: POSTGRES_USER
-            valueFrom:
-              secretKeyRef:
-                name: database-credentials
-                key: POSTGRES_USER
-          - name: POSTGRES_PASSWORD
-            valueFrom:
-              secretKeyRef:
-                name: database-credentials
-                key: POSTGRES_PASSWORD
 ---
-# Worker Service
+# Postgres Service
 apiVersion: v1
 kind: Service
 metadata:
-  name: worker-service
+  name: postgres-service
 spec:
   selector:
-    app: worker
+    app: postgres
   ports:
-    - port: 80
-      targetPort: 80
+    - name: postgres-port
+      port: 5432
+      targetPort: 5432

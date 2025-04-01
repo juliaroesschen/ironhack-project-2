@@ -21,11 +21,10 @@ spec:
         env:
           - name: POSTGRES_USER
             value: "postgres"
+          - name: POSTGRES_DB
+            value: "postgres"
           - name: POSTGRES_PASSWORD
-            valueFrom:
-              secretKeyRef:
-                name: database-credentials
-                key: POSTGRES_PASSWORD
+            value: "postgres"
 ---
 # Postgres Service
 apiVersion: v1
